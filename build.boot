@@ -1,6 +1,6 @@
 (set-env! :resource-paths #{"src/cljs"}
           :source-paths   #{"test/cljs"}
-          :dependencies   '[[cljs-ajax                 "0.7.2"   :scope "provided"]
+          :dependencies   '[[cljs-ajax                 "0.7.2"]
                             [org.clojure/clojurescript "1.9.946" :scope "provided"]
                             [re-frame                  "0.10.2"  :scope "provided"]
 

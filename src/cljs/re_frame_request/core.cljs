@@ -4,9 +4,13 @@
             [re-frame-request.subscriptions :as rfr-subscriptions]))
 
 (def initial-state
-  "Initial re-frame-request state. All requests are associated into a map."
+  "Initial re-frame-request state.
+
+  All requests are associated into a map."
   {})
 
+
+;; Specs for each individual request
 (s/def ::status #{:loading :success :failure})
 (s/def ::request-time number?)
 (s/def ::error (s/nilable map?))
@@ -23,3 +27,9 @@
   "Registers re-frame-request subscriptions"
   []
   (rfr-subscriptions/register-subscriptions))
+
+(defn register-all
+  "Registers both re-frame-request events & subscriptions"
+  []
+  (register-events)
+  (register-subscriptions))
