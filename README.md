@@ -10,9 +10,7 @@ A ClojureScript library that tracks request state in [re-frame](https://github.c
 
 ### Register Events and Subscriptions
 
-You can register events and subscriptions seperatly by;
-
-#### 1. Registering Events
+Events and subscriptions can be registered seperatly;
 
 ```cljs
 (ns app.events
@@ -20,8 +18,6 @@ You can register events and subscriptions seperatly by;
 
 (rfr/register-events)
 ```
-
-#### 2. Registering Subscriptions
 
 ```cljs
 (ns app.subscriptions
@@ -32,8 +28,6 @@ You can register events and subscriptions seperatly by;
 
 Or you can use the `register-all` function to register both subscriptions & events.
 
-#### Register Events & Subscriptions
-
 ```cljs
 (ns app.core
   (:require [re-frame-request.core :as rfr]))
@@ -43,7 +37,7 @@ Or you can use the `register-all` function to register both subscriptions & even
 
 ### Request data
 
-Now once an event is dispatched that makes an ajax request, information about that request will automatically be tracked in application state. Here is an example of an event that uses `re-frame-request`.
+Once an event is dispatched that calls the `re-frame-request` handler, information about that request will automatically be tracked in application state. Here is an example of an event that uses `re-frame-request`.
 
 ```cljs
 (re-frame/reg-event-fx
