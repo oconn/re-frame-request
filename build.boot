@@ -19,7 +19,7 @@
       :version     +version+
       :description "ClojureScript (re-frame) library to improve XHR state management."
       :url         "https://github.com/oconn/re-frame-request"
-      :scm         {:url "git@github.com:oconn/re-frame-request.git"}
+      :scm         {:url "https://github.com/oconn/re-frame-request"}
       :license     {"Eclipse Public License"
                     "http://www.eclipse.org/legal/epl-v10.html"}}
  push {:repo "deploy-clojars"
