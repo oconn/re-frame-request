@@ -4,7 +4,7 @@ A ClojureScript library that tracks request state in [re-frame](https://github.c
 
 ## Install
 
-[![Latest Version](http://clojars.org/re-frame-request/latest-version.svg)](http://clojars.org/re-frame-request)
+[![Clojars Project](https://img.shields.io/clojars/v/oconn/re-frame-request.svg)](https://clojars.org/oconn/re-frame-request)
 
 ## Usage
 
