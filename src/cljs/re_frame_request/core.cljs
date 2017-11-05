@@ -20,8 +20,8 @@
 
 (defn register-events
   "Registers re-frame-request events and request handler"
-  []
-  (rfr-events/register-events))
+  [opts]
+  (rfr-events/register-events opts))
 
 (defn register-subscriptions
   "Registers re-frame-request subscriptions"
@@ -30,6 +30,6 @@
 
 (defn register-all
   "Registers both re-frame-request events & subscriptions"
-  []
-  (register-events)
+  [{:keys [event-options]}]
+  (register-events event-options)
   (register-subscriptions))

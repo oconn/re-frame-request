@@ -36,6 +36,12 @@
         (jar)
         (install)))
 
+(deftask dev
+  "Watches for changes and then installs locally"
+  []
+  (comp (watch)
+        (install-local)))
+
 (deftask deploy-snapshot
   "Deploys a new build to clojars"
   []

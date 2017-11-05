@@ -85,9 +85,18 @@
           ajax/ajax-request))))
 
 (defn register-events
-  []
+  [{:keys [start-interceptors
+           done-interceptors
+           reset-interceptors
+           request-interceptors]
+    :or {start-interceptors []
+         done-interceptors []
+         reset-interceptors []
+         request-interceptors []}}]
+
   (reg-event-db
    :request/done
+   (into request-interceptors done-interceptors)
    (fn [db [_ {:keys [name request-time error status]}]]
      (assoc-in db [:request name] {:status status
                                    :request-time request-time
@@ -95,6 +104,7 @@
 
   (reg-event-db
    :request/start
+   (into request-interceptors start-interceptors)
    (fn [db [_ {:keys [name request-time]}]]
      (assoc-in db [:request name] {:status :loading
                                    :request-time request-time
@@ -102,6 +112,7 @@
 
   (reg-event-db
    :request/reset
+   (into request-interceptors reset-interceptors)
    (fn [db [_ request-name]]
      (assoc-in db [:request request-name] nil)))
 
