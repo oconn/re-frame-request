@@ -11,6 +11,12 @@
 
   (reg-sub
    :request/track-request
-   (fn [_ _ ] (subscribe [:request/core]))
+   (fn [_ _] (subscribe [:request/core]))
    (fn [request [_ request-name]]
-     (get request request-name {:status :never-requested}))))
+     (get request request-name {:status :never-requested})))
+
+  (reg-sub
+   :request/is-dispatching
+   (fn [_ [_ request-name]] (subscribe [:request/core]))
+   (fn [request [_ request-name]]
+     (= :loading (get-in request [request-name :status])))))
