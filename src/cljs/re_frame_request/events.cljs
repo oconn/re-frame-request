@@ -64,6 +64,11 @@
              {:name name
               :request-time request-time}]))
 
+(defn format-kw->fn
+  [kw]
+  (case kw
+    :transit (ajax/transit-response-format)))
+
 (defn- handle-request
   [{:as request
     :keys [name
@@ -81,6 +86,7 @@
           (assoc :on-success (wrap-success! on-success name request-time))
           (assoc :on-failure (wrap-failure! on-failure name request-time))
           (dissoc :name)
+          (update :response-format format-kw->fn)
           request->xhrio-options
           ajax/ajax-request))))
 
