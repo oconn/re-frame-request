@@ -64,10 +64,34 @@
              {:name name
               :request-time request-time}]))
 
-(defn format-kw->fn
-  [kw]
-  (case kw
-    :transit (ajax/transit-response-format)))
+(defn format-response-kw->fn
+  [name]
+  (fn [kw]
+    (if-not (nil? kw)
+      (case kw
+        :transit (ajax/transit-response-format)
+        :json (ajax/json-response-format {:keywords? true})
+        :ring (ajax/ring-response-format)
+        :text (ajax/text-response-format)
+        :raw (ajax/raw-response-format)
+        (js/console.error (str "Response format " (pr-str kw)
+                               " is not a vaild format for request \""
+                               name "\"")))
+      (js/console.warn (str "Missing response format for xhr request \""
+                            name "\"")))))
+
+(defn format-request-kw->fn
+  [name]
+  (fn [kw]
+    (when-not (nil? kw)
+      (case kw
+        :transit (ajax/transit-request-format)
+        :json (ajax/json-request-format)
+        :url (ajax/url-request-format)
+        :text (ajax/text-request-format)
+        (js/console.error (str "Request format " (pr-str kw)
+                               " is not a vaild format for request \""
+                               name "\""))))))
 
 (defn- handle-request
   [{:as request
@@ -85,8 +109,9 @@
       (-> request
           (assoc :on-success (wrap-success! on-success name request-time))
           (assoc :on-failure (wrap-failure! on-failure name request-time))
+          (update :response-format (format-response-kw->fn name))
+          (update :format (format-request-kw->fn name))
           (dissoc :name)
-          (update :response-format format-kw->fn)
           request->xhrio-options
           ajax/ajax-request))))
 
