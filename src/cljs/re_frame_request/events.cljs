@@ -115,6 +115,26 @@
           request->xhrio-options
           ajax/ajax-request))))
 
+(defn- handle-mock
+  [{:as request
+    :keys [name
+           on-success
+           on-failure
+           mock]
+    :or {:on-success [:request/http-no-on-success]
+         :on-failure [:request/http-no-on-failure]}}]
+  (let [{:keys [time data error]
+         :or {time 200}} mock
+        request-time (.getTime (js/Date.))]
+
+    (.setTimeout
+     js/window
+     (fn []
+       (if error
+         ((wrap-failure! on-failure name request-time) error)
+         ((wrap-success! on-success name request-time) data)))
+     time)))
+
 (defn register-events
   [{:keys [start-interceptors
            done-interceptors
@@ -147,4 +167,6 @@
    (fn [db [_ request-name]]
      (assoc-in db [:request request-name] nil)))
 
-  (reg-fx :request handle-request))
+  (reg-fx :request handle-request)
+
+  (reg-fx :request-mock handle-mock))

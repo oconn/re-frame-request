@@ -1,8 +1,8 @@
 (set-env! :resource-paths #{"src/cljs"}
           :source-paths   #{"test/cljs"}
-          :dependencies   '[[cljs-ajax                 "0.7.2"]
-                            [org.clojure/clojurescript "1.9.946" :scope "provided"]
-                            [re-frame                  "0.10.2"  :scope "provided"]
+          :dependencies   '[[cljs-ajax                 "0.7.3"]
+                            [org.clojure/clojurescript "1.10.339" :scope "provided"]
+                            [re-frame                  "0.10.5"  :scope "provided"]
 
                             [adzerk/bootlaces  "0.1.13" :scope "test"]
                             [adzerk/boot-test  "1.2.0"  :scope "test"]])
@@ -12,7 +12,7 @@
          '[boot.git         :refer [last-commit]])
 
 (def project 'oconn/re-frame-request)
-(def +version+ "0.1.0-SNAPSHOT")
+(def +version+ "0.1.1-SNAPSHOT")
 
 (task-options!
  pom {:project     project
