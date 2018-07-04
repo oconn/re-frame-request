@@ -1,5 +1,5 @@
-(set-env! :resource-paths #{"src/cljs"}
-          :source-paths   #{"test/cljs"}
+(set-env! :resource-paths #{"src"}
+          :source-paths   #{"test"}
           :dependencies   '[[cljs-ajax                 "0.7.3"]
                             [org.clojure/clojurescript "1.10.339" :scope "provided"]
                             [re-frame                  "0.10.5"  :scope "provided"]

@@ -135,6 +135,22 @@
          ((wrap-success! on-success name request-time) data)))
      time)))
 
+(defn request-start
+  [db [_ {:keys [name request-time]}]]
+  (assoc-in db [:request name] {:status :loading
+                                :request-time request-time
+                                :error nil}))
+
+(defn request-done
+  [db [_ {:keys [name request-time error status]}]]
+  (assoc-in db [:request name] {:status status
+                                :request-time request-time
+                                :error error}))
+
+(defn request-reset
+  [db [_ request-name]]
+  (assoc-in db [:request request-name] nil))
+
 (defn register-events
   [{:keys [start-interceptors
            done-interceptors
@@ -145,27 +161,17 @@
          reset-interceptors []
          request-interceptors []}}]
 
-  (reg-event-db
-   :request/done
-   (into request-interceptors done-interceptors)
-   (fn [db [_ {:keys [name request-time error status]}]]
-     (assoc-in db [:request name] {:status status
-                                   :request-time request-time
-                                   :error error})))
+  (reg-event-db :request/start
+                (into request-interceptors start-interceptors)
+                request-start)
 
-  (reg-event-db
-   :request/start
-   (into request-interceptors start-interceptors)
-   (fn [db [_ {:keys [name request-time]}]]
-     (assoc-in db [:request name] {:status :loading
-                                   :request-time request-time
-                                   :error nil})))
+  (reg-event-db :request/done
+                (into request-interceptors done-interceptors)
+                request-done)
 
-  (reg-event-db
-   :request/reset
-   (into request-interceptors reset-interceptors)
-   (fn [db [_ request-name]]
-     (assoc-in db [:request request-name] nil)))
+  (reg-event-db :request/reset
+                (into request-interceptors reset-interceptors)
+                request-reset)
 
   (reg-fx :request handle-request)
 
