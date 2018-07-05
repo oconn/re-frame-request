@@ -9,7 +9,6 @@
   All requests are associated into a map."
   {})
 
-
 ;; Specs for each individual request
 (s/def ::status #{:loading :success :failure})
 (s/def ::request-time number?)

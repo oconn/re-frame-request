@@ -127,6 +127,8 @@
          :or {time 200}} mock
         request-time (.getTime (js/Date.))]
 
+    (track-request! name request-time)
+
     (.setTimeout
      js/window
      (fn []
