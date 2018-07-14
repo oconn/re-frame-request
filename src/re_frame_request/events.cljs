@@ -151,7 +151,7 @@
 
 (defn request-reset
   [db [_ request-name]]
-  (assoc-in db [:request request-name] {:status :never-requested}))
+  (update db :request dissoc request-name))
 
 (defn register-events
   [{:keys [start-interceptors
