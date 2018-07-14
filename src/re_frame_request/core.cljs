@@ -10,7 +10,7 @@
   {})
 
 ;; Specs for each individual request
-(s/def ::status #{:loading :success :failure})
+(s/def ::status #{:loading :success :failure :never-requested})
 (s/def ::request-time number?)
 (s/def ::error (s/nilable map?))
 (s/def ::request (s/map-of keyword? (s/keys :req-un [::status
