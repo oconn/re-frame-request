@@ -100,20 +100,26 @@
            on-failure]
     :or {:on-success [:http-no-on-success]
          :on-failure [:http-no-on-failure]}}]
-  (let [seq-request-maps (if (sequential? request) request [request])
-        request-time (.getTime (js/Date.))]
+  (try
+    (let [seq-request-maps (if (sequential? request) request [request])
+          request-time (.getTime (js/Date.))]
 
-    (track-request! name request-time)
+      (track-request! name request-time)
 
-    (doseq [request seq-request-maps]
-      (-> request
-          (assoc :on-success (wrap-success! on-success name request-time))
-          (assoc :on-failure (wrap-failure! on-failure name request-time))
-          (update :response-format (format-response-kw->fn name))
-          (update :format (format-request-kw->fn name))
-          (dissoc :name)
-          request->xhrio-options
-          ajax/ajax-request))))
+      (doseq [request seq-request-maps]
+        (-> request
+            (assoc :on-success (wrap-success! on-success name request-time))
+            (assoc :on-failure (wrap-failure! on-failure name request-time))
+            (update :response-format (format-response-kw->fn name))
+            (update :format (format-request-kw->fn name))
+            (dissoc :name)
+            request->xhrio-options
+            ajax/ajax-request)))
+    (catch js/Error e
+      (js/console.error
+       (clj->js {:error-message (str "Failed to format request object for "
+                                     " '" name "'.")
+                 :error e})))))
 
 (defn- handle-mock
   [{:as request

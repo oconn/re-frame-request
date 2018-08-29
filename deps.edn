@@ -1,4 +1,4 @@
-{:deps {cljs-ajax {:mvn/version "0.7.3"}
+{:deps {cljs-ajax {:mvn/version "0.7.4"}
         org.clojure/clojurescript {:mvn/version "1.10.339"}
         re-frame {:mvn/version "0.10.5"}}
 
