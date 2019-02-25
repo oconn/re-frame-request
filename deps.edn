@@ -1,6 +1,6 @@
 {:deps {cljs-ajax {:mvn/version "0.7.4"}
-        org.clojure/clojurescript {:mvn/version "1.10.339"}
-        re-frame {:mvn/version "0.10.5"}}
+        org.clojure/clojurescript {:mvn/version "1.10.520"}
+        re-frame {:mvn/version "0.10.6"}}
 
  :aliases {:test {:extra-deps {olical/cljs-test-runner {:mvn/version "2.0.0"}}
                   :extra-paths ["test"]

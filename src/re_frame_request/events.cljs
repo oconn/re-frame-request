@@ -57,6 +57,13 @@
                 :request-time request-time}])
     (dispatch (conj on-failure error))))
 
+(defn wrap-progress!
+  "Wraps progress event"
+  [on-progress _ _]
+  (fn [progress-event]
+    (when (some? on-progress)
+      (dispatch (conj on-progress progress-event)))))
+
 (defn track-request!
   "Kicks off the request tracking process"
   [name request-time]
@@ -97,7 +104,8 @@
   [{:as request
     :keys [name
            on-success
-           on-failure]
+           on-failure
+           on-progress]
     :or {:on-success [:http-no-on-success]
          :on-failure [:http-no-on-failure]}}]
   (try
@@ -108,8 +116,15 @@
 
       (doseq [request seq-request-maps]
         (-> request
-            (assoc :on-success (wrap-success! on-success name request-time))
-            (assoc :on-failure (wrap-failure! on-failure name request-time))
+            (assoc :progress-handler (wrap-progress! on-progress
+                                                     name
+                                                     request-time))
+            (assoc :on-success (wrap-success! on-success
+                                              name
+                                              request-time))
+            (assoc :on-failure (wrap-failure! on-failure
+                                              name
+                                              request-time))
             (update :response-format (format-response-kw->fn name))
             (update :format (format-request-kw->fn name))
             (dissoc :name)
