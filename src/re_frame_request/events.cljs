@@ -106,8 +106,8 @@
            on-success
            on-failure
            on-progress]
-    :or {:on-success [:http-no-on-success]
-         :on-failure [:http-no-on-failure]}}]
+    :or {on-success [:http-no-on-success]
+         on-failure [:http-no-on-failure]}}]
   (try
     (let [seq-request-maps (if (sequential? request) request [request])
           request-time (.getTime (js/Date.))]
@@ -142,8 +142,8 @@
            on-success
            on-failure
            mock]
-    :or {:on-success [:request/http-no-on-success]
-         :on-failure [:request/http-no-on-failure]}}]
+    :or {on-success [:request/http-no-on-success]
+         on-failure [:request/http-no-on-failure]}}]
   (let [{:keys [time data error]
          :or {time 200}} mock
         request-time (.getTime (js/Date.))]
