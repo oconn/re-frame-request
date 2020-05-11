@@ -13,3 +13,4 @@ pom.xml.asc
 .cpcache
 cljs-test-runner-out
 node_modules
+gpg.edn
