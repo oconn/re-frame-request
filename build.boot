@@ -10,7 +10,7 @@
          '[boot.git         :refer [last-commit]])
 
 (def project 'oconn/re-frame-request)
-(def +version+ "0.1.2")
+(def +version+ "0.1.3")
 
 (task-options!
  pom {:project     project
