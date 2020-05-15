@@ -4,7 +4,7 @@
                             [org.clojure/clojurescript "1.10.520" :scope "provided"]
                             [re-frame                  "0.10.6"  :scope "provided"]
 
-                            [adzerk/bootlaces  "0.1.13" :scope "test"]])
+                            [adzerk/bootlaces  "0.2.0" :scope "test"]])
 
 (require '[adzerk.bootlaces :refer :all]
          '[boot.git         :refer [last-commit]])
