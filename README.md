@@ -16,7 +16,8 @@ Events and subscriptions can be registered seperatly;
 (ns app.events
   (:require [re-frame-request.core :as rfr]))
 
-(rfr/register-events)
+; if providing no `opts`, :
+(rfr/register-events {}) 
 ```
 
 ```cljs
@@ -32,7 +33,8 @@ Or you can use the `register-all` function to register both subscriptions & even
 (ns app.core
   (:require [re-frame-request.core :as rfr]))
 
-(rfr/register-all)
+; if providing no `opts`:
+(rfr/register-all {})
 ```
 
 ### Request data
@@ -40,16 +42,26 @@ Or you can use the `register-all` function to register both subscriptions & even
 Once an event is dispatched that calls the `re-frame-request` handler, information about that request will automatically be tracked in application state. Here is an example of an event that uses `re-frame-request`.
 
 ```cljs
+(rf/reg-event-db
+  :github/add-user
+  (fn [db [_ user]]
+    (assoc db :github/user user)))
+
+(rf/reg-event-db
+  :github/handle-failure
+  (fn [db [_ error]]
+    (assoc db :github/failure error)))
+
 (re-frame/reg-event-fx
  :github/get-user
  (fn [{:keys [db]} [_ user-name]]
    {:db db
     :request {:name :github/get-user
               :method :get
-              :uri (str "https://api.github.com/userss/" user-name)
-              :response-format (json-response-format)
-              :on-success [:no-op]
-              :on-error [:no-op]}}))
+              :uri (str "https://api.github.com/users/" user-name)
+              :response-format :json
+              :on-success [:github/add-user]
+              :on-failure [:github/handle-failure]}}))
 ```
 
 Note: This uses the `ajax-cljs` under the hood so reference the [docs](https://github.com/JulianBirch/cljs-ajax) for usage.
@@ -57,6 +69,30 @@ Note: This uses the `ajax-cljs` under the hood so reference the [docs](https://g
 #### `name`
 
 The `name` property is the only added property used and is required to track a request. It must be a unique keyword for each different request.
+
+### Tracking the request in state: success
+
+Suppose dispatch the following event:
+```cljs
+(re-frame.core/dispatch [:github/get-user "oconn"])
+```
+
+Under the `:request` key, the `:name`  parameter key’s value will be the status of our request. As seen from re-frame-10x UI:
+
+![](re-frame-request-success.png)
+
+### Tracking the request in state: failure
+
+Suppose we dispatch the event, but request a non-existent Github user:
+```cljs
+(re-frame.core/dispatch [:github/get-user "_!x_!z_!y"])
+```
+
+We'll see that the request fails ("404"), and that the `:request` key in the state contains the error under `:error`:
+
+![](re-frame-request-failure.png)
+
+In fact, we probably didn't even need to save that error separately in the state under `:github/failure` :-)  
 
 ### Register Spec Checks (Optional)
 
