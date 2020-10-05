@@ -105,58 +105,60 @@
     :keys [name
            on-success
            on-failure
-           on-progress]
-    :or {on-success [:http-no-on-success]
-         on-failure [:http-no-on-failure]}}]
-  (try
-    (let [seq-request-maps (if (sequential? request) request [request])
-          request-time (.getTime (js/Date.))]
+           on-progress]}]
+  (if (or (nil? on-success) (nil? on-failure))
+    (js/console.error
+      (clj->js {:error-message (str "Please provide both :on-success and :on-failure in the :request map.")}))
+    (try
+      (let [seq-request-maps (if (sequential? request) request [request])
+            request-time (.getTime (js/Date.))]
 
-      (track-request! name request-time)
+        (track-request! name request-time)
 
-      (doseq [request seq-request-maps]
-        (-> request
-            (assoc :progress-handler (wrap-progress! on-progress
-                                                     name
-                                                     request-time))
-            (assoc :on-success (wrap-success! on-success
-                                              name
-                                              request-time))
-            (assoc :on-failure (wrap-failure! on-failure
-                                              name
-                                              request-time))
-            (update :response-format (format-response-kw->fn name))
-            (update :format (format-request-kw->fn name))
-            (dissoc :name)
-            request->xhrio-options
-            ajax/ajax-request)))
-    (catch js/Error e
-      (js/console.error
-       (clj->js {:error-message (str "Failed to format request object for "
-                                     " '" name "'.")
-                 :error e})))))
+        (doseq [request seq-request-maps]
+          (-> request
+              (assoc :progress-handler (wrap-progress! on-progress
+                                                       name
+                                                       request-time))
+              (assoc :on-success (wrap-success! on-success
+                                                name
+                                                request-time))
+              (assoc :on-failure (wrap-failure! on-failure
+                                                name
+                                                request-time))
+              (update :response-format (format-response-kw->fn name))
+              (update :format (format-request-kw->fn name))
+              (dissoc :name)
+              request->xhrio-options
+              ajax/ajax-request)))
+      (catch js/Error e
+        (js/console.error
+         (clj->js {:error-message (str "Failed to format request object for "
+                                       " '" name "'.")
+                   :error e}))))))
 
 (defn- handle-mock
   [{:as request
     :keys [name
            on-success
            on-failure
-           mock]
-    :or {on-success [:request/http-no-on-success]
-         on-failure [:request/http-no-on-failure]}}]
-  (let [{:keys [time data error]
-         :or {time 200}} mock
-        request-time (.getTime (js/Date.))]
+           mock]}]
+  (if (or (nil? on-success) (nil? on-failure))
+    (js/console.error
+      (clj->js {:error-message (str "Please provide both :on-success and :on-failure in the :request map.")}))
+    (let [{:keys [time data error]
+           :or {time 200}} mock
+          request-time (.getTime (js/Date.))]
 
-    (track-request! name request-time)
+      (track-request! name request-time)
 
-    (.setTimeout
-     js/window
-     (fn []
-       (if error
-         ((wrap-failure! on-failure name request-time) error)
-         ((wrap-success! on-success name request-time) data)))
-     time)))
+      (.setTimeout
+       js/window
+       (fn []
+         (if error
+           ((wrap-failure! on-failure name request-time) error)
+           ((wrap-success! on-success name request-time) data)))
+       time))))
 
 (defn request-start
   [db [_ {:keys [name request-time]}]]
