@@ -8,7 +8,7 @@
 (defn ajax-xhrio-handler
   {:attribution "https://github.com/Day8/re-frame-http-fx"
    :doc "ajax-request only provides a single handler for success and errors"}
-  [on-success on-failure xhrio [success? response]]
+  [on-success on-failure ^js xhrio [success? response]]
   (if success?
     (on-success response)
     (let [details (merge
