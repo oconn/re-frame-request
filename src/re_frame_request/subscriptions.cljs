@@ -17,6 +17,16 @@
 
   (reg-sub
    :request/is-dispatching
-   (fn [_ [_ request-name]] (subscribe [:request/core]))
+   (fn [_ [_ _]] (subscribe [:request/core]))
    (fn [request [_ request-name]]
-     (= :loading (get-in request [request-name :status])))))
+     (= :loading (get-in request [request-name :status]))))
+  
+  (reg-sub
+   :request/any-dispatching
+   (fn [_ [_ _]] (subscribe [:request/core]))
+   (fn [request [_ & request-names]]
+     (->> request-names
+          (map #(get-in request [% :status]))
+          (into #{})
+          :loading
+          some?))))
