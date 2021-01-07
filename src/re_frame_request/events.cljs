@@ -72,11 +72,11 @@
               :request-time request-time}]))
 
 (defn format-response-kw->fn
-  [name]
+  [name {:keys [transit-read-handlers]}]
   (fn [kw]
     (if-not (nil? kw)
       (case kw
-        :transit (ajax/transit-response-format)
+        :transit (ajax/transit-response-format {:handlers transit-read-handlers})
         :json (ajax/json-response-format {:keywords? true})
         :ring (ajax/ring-response-format)
         :text (ajax/text-response-format)
@@ -88,11 +88,11 @@
                             name "\"")))))
 
 (defn format-request-kw->fn
-  [name]
+  [name {:keys [transit-write-handlers]}]
   (fn [kw]
     (when-not (nil? kw)
       (case kw
-        :transit (ajax/transit-request-format)
+        :transit (ajax/transit-request-format {:handlers transit-write-handlers})
         :json (ajax/json-request-format)
         :url (ajax/url-request-format)
         :text (ajax/text-request-format)
@@ -101,7 +101,8 @@
                                name "\""))))))
 
 (defn- handle-request
-  [{:as request
+  [{:keys [transit-read-handlers transit-write-handlers]}
+   {:as request
     :keys [name
            on-success
            on-failure
@@ -114,6 +115,7 @@
 
       (track-request! name request-time)
 
+
       (doseq [request seq-request-maps]
         (-> request
             (assoc :progress-handler (wrap-progress! on-progress
@@ -125,8 +127,8 @@
             (assoc :on-failure (wrap-failure! on-failure
                                               name
                                               request-time))
-            (update :response-format (format-response-kw->fn name))
-            (update :format (format-request-kw->fn name))
+            (update :response-format (format-response-kw->fn name {:transit-read-handlers transit-read-handlers}))
+            (update :format (format-request-kw->fn name {:transit-write-handlers transit-write-handlers}))
             (dissoc :name)
             request->xhrio-options
             ajax/ajax-request)))
@@ -137,8 +139,7 @@
                  :error e})))))
 
 (defn- handle-mock
-  [{:as request
-    :keys [name
+  [{:keys [name
            on-success
            on-failure
            mock]
@@ -178,11 +179,15 @@
   [{:keys [start-interceptors
            done-interceptors
            reset-interceptors
-           request-interceptors]
+           request-interceptors
+           transit-read-handlers
+           transit-write-handlers]
     :or {start-interceptors []
          done-interceptors []
          reset-interceptors []
-         request-interceptors []}}]
+         request-interceptors []
+         transit-read-handlers {}
+         transit-write-handlers {}}}]
 
   (reg-event-db :request/start
                 (into request-interceptors start-interceptors)
@@ -196,6 +201,8 @@
                 (into request-interceptors reset-interceptors)
                 request-reset)
 
-  (reg-fx :request handle-request)
+  (reg-fx :request (partial handle-request
+                            {:transit-read-handlers transit-read-handlers
+                             :transit-write-handlers transit-write-handlers}))
 
   (reg-fx :request-mock handle-mock))
