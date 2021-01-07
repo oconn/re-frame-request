@@ -1,6 +1,6 @@
 {:deps {org.clojure/clojurescript {:mvn/version "1.10.758"}
-        cljs-ajax                 {:mvn/version "0.8.0"}
-        re-frame                  {:mvn/version "0.10.6"}}
+        cljs-ajax/cljs-ajax {:mvn/version "0.8.0"}
+        re-frame/re-frame {:mvn/version "0.10.6"}}
  :paths ["src"]
  :aliases {:test
            {:extra-deps {olical/cljs-test-runner {:mvn/version "3.5.0"}}
@@ -20,4 +20,4 @@
             ["-m" "deps-deploy.deps-deploy" "deploy" "app.jar"]
 
             :extra-deps
-            {deps-deploy {:mvn/version "RELEASE"}}}}}
+            {deps-deploy/deps-deploy {:mvn/version "RELEASE"}}}}}
