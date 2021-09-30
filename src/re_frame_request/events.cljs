@@ -66,7 +66,7 @@
                 :name name
                 :error nil
                 :request-time request-time}])
-    (dispatch (conj on-abort))))
+    (dispatch on-abort)))
 
 (defn wrap-progress!
   "Wraps progress event"
