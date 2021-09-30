@@ -47,26 +47,20 @@
     (dispatch (conj on-success response))))
 
 (defn wrap-failure!
-  "Wraps the passed in on-failure callback"
-  [on-failure name request-time]
+  "Wraps the passed in on-failure callback based on whether the
+   request failed, or was aborted intentionally"
+[on-failure on-abort name request-time]
   (fn [error]
-    (dispatch [:request/done
-               {:status :failure
-                :name name
-                :error error
-                :request-time request-time}])
-    (dispatch (conj on-failure error))))
-
-(defn wrap-abort!
-  "Wraps the passed in on-abort callback"
-  [on-abort name request-time]
-  (fn []
-    (dispatch [:request/done
-               {:status :aborted
-                :name name
-                :error nil
-                :request-time request-time}])
-    (dispatch on-abort)))
+    (let [aborted? (= :aborted (:failure error))]
+      (dispatch [:request/done
+                 {:status (if aborted? :aborted :failure)
+                  :name name
+                  :error error
+                  :request-time request-time}])
+      (if aborted?
+        (when (some? on-abort)
+          (dispatch (conj on-abort error)))
+        (dispatch (conj on-failure error))))))
 
 (defn wrap-progress!
   "Wraps progress event"
@@ -77,20 +71,17 @@
 
 (defn track-request!
   "Kicks off the request tracking process"
-  ([{:keys [name request-time request-xhrio on-abort]}]
+  ([name request-time]
+   (track-request! name request-time {}))
+  ([name request-time {:keys [request-xhrio]}]
    (dispatch [:request/start
               (cond-> {:name name
                        :request-time request-time}
                 (some? request-xhrio)
                 (assoc :abort #(try
                                  (ajax/abort request-xhrio)
-                                 (when (fn? on-abort)
-                                   (on-abort))
                                  (catch js/Error e
-                                   (js/console.error (str "Failed to abort request: " e))))))]))
-  ([name request-time]
-   (track-request! {:name name
-                    :request-time request-time})))
+                                   (js/console.error (str "Failed to abort request: " e))))))])))
 
 (defn format-response-kw->fn
   [name {:keys [transit-read-handlers]}]
@@ -142,6 +133,7 @@
                                                 name
                                                 request-time))
               (assoc :on-failure (wrap-failure! on-failure
+                                                on-abort
                                                 name
                                                 request-time))
               (update :response-format (format-response-kw->fn name {:transit-read-handlers transit-read-handlers}))
@@ -150,13 +142,10 @@
               request->xhrio-options
               ajax/ajax-request)]
 
-      (track-request! (cond-> {:name name
-                               :request-time request-time
-                               :request-xhrio request-xhrio}
+      (track-request! name request {:request-xhrio request-xhrio}
+                      #_(cond-> {:request-xhrio request-xhrio}
                         (some? on-abort)
-                        (assoc :on-abort (wrap-abort! on-abort
-                                                      name
-                                                      request-time)))))
+                        (assoc :on-abort #(dispatch on-abort)))))
     (catch js/Error e
       (js/console.error
        (clj->js {:error-message (str "Failed to format request object for "
@@ -166,6 +155,7 @@
 (defn- handle-mock
   [{:keys [name
            on-success
+           on-abort
            on-failure
            mock]
     :or {on-success [:request/http-no-on-success]
@@ -180,7 +170,7 @@
      js/window
      (fn []
        (if error
-         ((wrap-failure! on-failure name request-time) error)
+         ((wrap-failure! on-failure on-abort name request-time) error)
          ((wrap-success! on-success name request-time) data)))
      time)))
 
@@ -195,7 +185,8 @@
   [db [_ {:keys [name request-time error status]}]]
   (assoc-in db [:request name] {:status status
                                 :request-time request-time
-                                :error error}))
+                                :error error
+                                :abort nil}))
 
 (defn request-reset
   [db [_ request-name]]
